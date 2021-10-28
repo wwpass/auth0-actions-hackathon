@@ -49,7 +49,7 @@
             </span>
           </p> -->
         </div>
-        <div class="after_connect" style="display: none;">
+        <div class="after_connect">
           <h2 class="heading heading--h2 heading--light heading--marginBottom-0">Connecting VPN</h2>
           <p class="text" id="connect_text">
             Your VPN will start automatically.
@@ -83,20 +83,79 @@
     </ul>
   </footer>
 
-  <script>
+  <script type="text/javascript">
     window.history.replaceState({}, document.title, document.location.pathname);
-  </script>
 
-  <script>
-    const beforeConnect = document.querySelector(`.before_connect`);
-    const afterConnect = document.querySelector(`.after_connect`);
-    const timeoutConnect = document.querySelector(`.timeout_connect`);
-    const profileSelector = document.querySelector(`#profile_selector`);
-    const buttonConnect = document.querySelector(`#connect`);
-    const buttonTimer = document.querySelector(`.button__timer`);
+    var isMobile = function isMobile() {
+      return navigator && `userAgent` in navigator && navigator.userAgent.match(/iPhone|iPod|iPad|Android/i);
+    };
+    const content = document.querySelector(`.content`);
+    const mobile = content.querySelector(`#mobile_advice`);
+    const desktop = content.querySelector(`#desktop_advice`);
+    const beforeConnect = content.querySelector(`.before_connect`);
+    const afterConnect = content.querySelector(`.after_connect`);
+    const timeoutConnect = content.querySelector(`.timeout_connect`);
+    const buttonReload = content.querySelector(`#reload`);
+    const profileSelector = content.querySelector(`#profile_selector`);
+    const buttonConnect = content.querySelector(`#connect`);
+    const buttonTimer = content.querySelector(`.button__timer`);
+    const indicators = document.querySelector(`.indicators`);
+    const profiles = JSON.parse('{{ json_encode(available_profiles) }}');
+
+    document.addEventListener(`DOMContentLoaded`, () => {
+      if (isMobile()) {
+        mobile.style.display = `block`;
+      } else {
+        desktop.style.display = `block`;
+      }
+      const last_profile = localStorage.getItem(`last_profile`);
+      if (last_profile != null && profiles[last_profile] != undefined) {
+          profileSelector.value = last_profile;
+      }
+      for (name in profiles) {
+        const profile = profiles[name];
+        if (profile.check_url) {
+          const indicator = document.createElement(`li`);
+          indicator.id = `indicator_${name}`;
+          indicator.classList.add(`indicators__indicator`);
+
+          let statusElement = ``;
+
+          testConnection(profile.check_url, (status) => {
+            if (status) {
+              indicator.classList.add(`indicators__indicator--connected`);
+              statusElement = `
+              <span class="indicators__status indicators__status--connected">Connected</span>`;
+            } else {
+              indicator.classList.add(`indicators__indicator--disconnected`);
+              statusElement = `
+              <span class="indicators__status indicators__status--disconnected">Disconnected</span>`;
+            }
+            indicator.innerHTML = `${name}: ${statusElement}`;
+          });
+
+          // indicator.innerHTML = `${name}: ${statusElement}`;
+
+          indicators.appendChild(indicator);
+        }
+      }
+    });
+
+    const setButtonTimer = (seconds) => {
+      buttonTimer.innerHTML = `
+        ${seconds}
+        <span class="button__timerAnimation"></span>`;
+    };
 
     let delay = 30;
-    
+    setButtonTimer(delay);
+
+    const delayUpdate = setInterval(() => {
+      delay -= 1;
+      setButtonTimer(delay);
+    }, 1000);
+    window.setTimeout(() => { clearInterval(delayUpdate) }, delay * 1000);
+
     const timeoutConnectUpdate = setTimeout(() => {
       beforeConnect.style.display = `none`;
       timeoutConnect.style.display = `block`;
@@ -111,61 +170,57 @@
         return false;
       }
       localStorage.setItem(`last_profile`, profile);
-      const anyconnect_url = `#TODO-URL`
-      console.log(`Redirect to: ${anyconnect_url}`);
-      window.open(anyconnect_url, `_blank`);
+      var vpn_url = profiles[profile].url;
+      console.log(`Redirect to: ${vpn_url}`);
+      window.open(vpn_url, `_blank`);
       beforeConnect.style.display = `none`;
       afterConnect.style.display = `block`;
       return false;
     });
 
-    const setButtonTimer = (seconds) => {
-      buttonTimer.innerHTML = `
-        ${seconds}
-        <span class="button__timerAnimation"></span>`;
-    };
-    setButtonTimer(delay);
-
-    const delayUpdate = setInterval(() => {
-      delay -= 1;
-      setButtonTimer(delay);
-    }, 1000);
-    window.setTimeout(() => { clearInterval(delayUpdate) }, delay * 1000);
-  </script>
-
-  <script>
-    const buttonReload = document.querySelector(`#reload`);
-
     buttonReload.addEventListener(`click`, () => {
       location.reload();
     });
 
-  </script>
-
-  <script>
-    const indicators = document.querySelector(`.indicators`);
-    const indicator = document.createElement(`li`);
-    const name = `Some_Name`;
-    indicator.id = `indicator_${name}`;
-    indicator.classList.add(`indicators__indicator`);
-
-    let statusElement = ``;
-
-    const status = `ok`;
-    
-      if (status) {
-        indicator.classList.add(`indicators__indicator--connected`);
-        statusElement = `
-        <span class="indicators__status indicators__status--connected">Connected</span>`;
-      } else {
-        indicator.classList.add(`indicators__indicator--disconnected`);
-        statusElement = `
-        <span class="indicators__status indicators__status--disconnected">Disconnected</span>`;
+    const testConnection = (resource, callback) => {
+      let state  = 0; // Indeterminate state
+      let controller = null;
+      const newStatus = (st) => {
+        if (st) {
+          if (state != 1) {
+              state = 1;
+              callback(true);
+            }
+        } else {
+          if (state != -1) {
+            state = -1;
+            callback(false);
+          }
+        }
       }
-
-    indicator.innerHTML = `${name}: ${statusElement}`;
-
-    indicators.appendChild(indicator);
+      const tryFetch = () => {
+        if (controller !== null)
+          controller.abort()
+        controller = new AbortController();
+        fetch(resource, {
+          cache: 'no-store',
+          mode: 'no-cors',
+          referrerPolicy: 'no-referrer',
+          signal: controller.signal
+        }).then((response) => {
+          if (response.status < 400) {
+            newStatus(true);
+          } else {
+            newStatus(false);
+          }
+        }, () => {
+          newStatus(false);
+        })
+      };
+      tryFetch();
+      const id = setInterval(tryFetch, 1000);
+      return id;
+    }
   </script>
 </body>
 
