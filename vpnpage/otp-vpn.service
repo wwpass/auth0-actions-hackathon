@@ -1,0 +1,15 @@
+# /lib/systemd/system/wwpass-a0client.service
+[Unit]
+Description="Simple web page to redirect to VPN connection with OTP"
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=2s
+ExecStart=/usr/bin/python3 /opt/otp-vpn/webapp.py --config=/etc/otp-vpn.conf
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

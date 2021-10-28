@@ -1,0 +1,52 @@
+server {
+	listen 80;
+        server_name example.com;
+
+        location /.well-known {
+                root /opt/letsencrypt/;
+                allow all;
+        }
+
+        location / {
+                rewrite ^(.*)$ https://example.com$1;
+        }
+}
+
+server {
+	listen 443;
+        server_name example.com;
+        include ssl.conf;
+        ssl_certificate /etc/ssl/certs/example.com.crt;
+        ssl_certificate_key /etc/ssl/private/example.com.key;
+        ssl_verify_depth 3;
+	add_header Strict-Transport-Security "max-age=31536000;" always;
+
+        access_log /var/log/nginx/a0-access.log;
+        error_log /var/log/nginx/a0-error.log;
+
+
+	location /dashboard {
+		if ($remote_addr != "10.26.22.1") {
+			return 302 /;
+		}
+		proxy_pass http://backend.local:3001;
+		include webapp.conf;
+	}
+
+	location /vpn {
+		alias  /var/www/auth0-actions-hackathon-static/;
+		index a0login.html;
+	}
+
+    location / {
+		proxy_pass http://backend.local:3001;
+		include webapp.conf;
+	}
+
+	location = /probe/probe-demovpn.html {
+		root /var/www/html/;
+		allow 10.26.22.26/32;
+		deny all;
+	}
+
+}
