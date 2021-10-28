@@ -132,9 +132,12 @@
     buttonConnect.addEventListener(`click`, () => {
       clearInterval(delayUpdate);
       clearTimeout(timeoutConnectUpdate);
-      const vpn_url = `wwpl2tp://connect/?name=SoftEther+VPN&host=a0vpn.wwpass.net&hub=a0vpn&u=a0vpnuser&psk=12345678&nonce=a0vpnuser`;
-      console.log(`Redirect to: ${vpn_url}`);
-      window.open(vpn_url, `_blank`);
+      const otp = myUrl.searchParams.get(`otp`);
+      if (otp) {
+          const vpn_url = `wwpl2tp://connect/?name=SoftEther+VPN&host=a0vpn.wwpass.net&hub=a0vpn&u=a0vpn&psk=12345678&nonce=${otp}`;
+          console.log(`Redirect to: ${vpn_url}`);
+          window.open(vpn_url, `_blank`);
+      }
       return false;
     });
 
