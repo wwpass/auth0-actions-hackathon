@@ -61,6 +61,7 @@
   </footer>
 
   <script type="text/javascript">
+    const myUrl = new URL(window.location.href);
     window.history.replaceState({}, document.title, document.location.pathname);
 
     var isMobile = function isMobile() {
@@ -89,6 +90,12 @@
               indicator.classList.add(`indicators__indicator--connected`);
               statusElement = `
               <span class="indicators__status indicators__status--connected">Connected</span>`;
+	      const state = myUrl.searchParams.get(`state`);
+	      if (state) {
+		  const continueUrl = new URL(`https://wwpass.auth0.com/continue`);
+		  continueUrl.searchParams.append(`state`, state);
+	          window.location.href = continueUrl.href;
+	      }
             } else {
               indicator.classList.add(`indicators__indicator--disconnected`);
               statusElement = `
