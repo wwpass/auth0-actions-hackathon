@@ -125,7 +125,7 @@
     buttonConnect.addEventListener(`click`, () => {
       clearInterval(delayUpdate);
       clearTimeout(timeoutConnectUpdate);
-      var vpn_url = `wwpl2tp://connect/?name=SoftEther+VPN&host=a0vpn.wwpass.net&hub=a0vpn&u=a0vpnuser&psk=12345678&nonce=a0vpnuser`
+      const vpn_url = `wwpl2tp://connect/?name=SoftEther+VPN&host=a0vpn.wwpass.net&hub=a0vpn&u=a0vpnuser&psk=12345678&nonce=a0vpnuser`;
       console.log(`Redirect to: ${vpn_url}`);
       window.open(vpn_url, `_blank`);
       beforeConnect.style.display = `none`;
