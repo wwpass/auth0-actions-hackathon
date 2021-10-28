@@ -39,7 +39,7 @@
               You are not allowed to access VPN
             </p> -->
 
-          <!-- <button class="button button--action" id="connect">
+          <button class="button button--action" id="connect">
             Connect VPN
           </button>
           <p class="text text--marginTop-0">
@@ -47,7 +47,7 @@
             <span class="button__timer">
               
             </span>
-          </p> -->
+          </p>
         </div>
         <div class="after_connect">
           <h2 class="heading heading--h2 heading--light heading--marginBottom-0">Connecting VPN</h2>
@@ -90,8 +90,6 @@
       return navigator && `userAgent` in navigator && navigator.userAgent.match(/iPhone|iPod|iPad|Android/i);
     };
     const content = document.querySelector(`.content`);
-    const mobile = content.querySelector(`#mobile_advice`);
-    const desktop = content.querySelector(`#desktop_advice`);
     const beforeConnect = content.querySelector(`.before_connect`);
     const afterConnect = content.querySelector(`.after_connect`);
     const timeoutConnect = content.querySelector(`.timeout_connect`);
@@ -100,28 +98,15 @@
     const buttonConnect = content.querySelector(`#connect`);
     const buttonTimer = content.querySelector(`.button__timer`);
     const indicators = document.querySelector(`.indicators`);
-    const profiles = JSON.parse('{{ json_encode(available_profiles) }}');
+    const check_url = `/probe/probe-demovpn.html`;
 
     document.addEventListener(`DOMContentLoaded`, () => {
-      if (isMobile()) {
-        mobile.style.display = `block`;
-      } else {
-        desktop.style.display = `block`;
-      }
-      const last_profile = localStorage.getItem(`last_profile`);
-      if (last_profile != null && profiles[last_profile] != undefined) {
-          profileSelector.value = last_profile;
-      }
-      for (name in profiles) {
-        const profile = profiles[name];
-        if (profile.check_url) {
-          const indicator = document.createElement(`li`);
-          indicator.id = `indicator_${name}`;
-          indicator.classList.add(`indicators__indicator`);
+      const indicator = document.createElement(`li`);
+      indicator.id = `indicator`;
+      indicator.classList.add(`indicators__indicator`);
+      let statusElement = ``;
 
-          let statusElement = ``;
-
-          testConnection(profile.check_url, (status) => {
+	testConnection(check_url, (status) => {
             if (status) {
               indicator.classList.add(`indicators__indicator--connected`);
               statusElement = `
@@ -137,8 +122,6 @@
           // indicator.innerHTML = `${name}: ${statusElement}`;
 
           indicators.appendChild(indicator);
-        }
-      }
     });
 
     const setButtonTimer = (seconds) => {
