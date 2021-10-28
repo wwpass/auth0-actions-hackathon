@@ -17,29 +17,13 @@
         </div>
         <div class="hr"></div>
         <div class="before_connect">
-          <ul class="indicators">
-            <!-- <li id="indicator_WWPassVPN" class="indicators__indicator indicators__indicator--connected">WWPassVPN: <span class="indicators__status indicators__status--connected">Connected</span></li>
-            <li id="indicator_WWPassVPN" class="indicators__indicator indicators__indicator--disconnected">WWPassVPN: <span class="indicators__status indicators__status--disconnected">Disconnected</span></li> -->
-          </ul>
+          <ul class="indicators"></ul>
 
-            <p class="text">
-              <b>Authentication successful</b>
-            </p>
-            
-            <div class="form">
-              <p class="text">
-                Now your VPN will be connected.
-                <button class="button button--action" id="retry" disabled>
-                  Try again
-                </button>
-              </p>
-            </div>
+          <p class="text">
+            <b>Authentication successful</b>
+          </p>
 
-            <!-- <p class="text">
-              You are not allowed to access VPN
-            </p> -->
-
-          <!-- <button class="button button--action" id="connect">
+          <button class="button button--action" id="connect">
             Connect VPN
           </button>
           <p class="text text--marginTop-0">
@@ -47,20 +31,13 @@
             <span class="button__timer">
               
             </span>
-          </p> -->
-        </div>
-        <div class="after_connect">
-          <h2 class="heading heading--h2 heading--light heading--marginBottom-0">Connecting VPN</h2>
-          <p class="text" id="connect_text">
-            Your VPN will start automatically.
           </p>
-          <button class="button button--action">Reconnect VPN</button>
         </div>
         <div class="timeout_connect" style="display: none;">
           <p class="text">
-            Your current connection timed out.
+            Your current authorization timed out.
             <button class="button button--action" id="reload">
-              Reload page
+              Try again
             </button>
           </p>
         </div>
@@ -84,14 +61,13 @@
   </footer>
 
   <script type="text/javascript">
+    const myUrl = new URL(window.location.href);
     window.history.replaceState({}, document.title, document.location.pathname);
 
     var isMobile = function isMobile() {
       return navigator && `userAgent` in navigator && navigator.userAgent.match(/iPhone|iPod|iPad|Android/i);
     };
     const content = document.querySelector(`.content`);
-    const mobile = content.querySelector(`#mobile_advice`);
-    const desktop = content.querySelector(`#desktop_advice`);
     const beforeConnect = content.querySelector(`.before_connect`);
     const afterConnect = content.querySelector(`.after_connect`);
     const timeoutConnect = content.querySelector(`.timeout_connect`);
@@ -100,32 +76,26 @@
     const buttonConnect = content.querySelector(`#connect`);
     const buttonTimer = content.querySelector(`.button__timer`);
     const indicators = document.querySelector(`.indicators`);
-    const profiles = JSON.parse('{{ json_encode(available_profiles) }}');
+    const name = `VPN Status`;
+    const check_url = `/probe/probe-demovpn.html`;
 
     document.addEventListener(`DOMContentLoaded`, () => {
-      if (isMobile()) {
-        mobile.style.display = `block`;
-      } else {
-        desktop.style.display = `block`;
-      }
-      const last_profile = localStorage.getItem(`last_profile`);
-      if (last_profile != null && profiles[last_profile] != undefined) {
-          profileSelector.value = last_profile;
-      }
-      for (name in profiles) {
-        const profile = profiles[name];
-        if (profile.check_url) {
-          const indicator = document.createElement(`li`);
-          indicator.id = `indicator_${name}`;
-          indicator.classList.add(`indicators__indicator`);
+      const indicator = document.createElement(`li`);
+      indicator.id = `indicator`;
+      indicator.classList.add(`indicators__indicator`);
+      let statusElement = ``;
 
-          let statusElement = ``;
-
-          testConnection(profile.check_url, (status) => {
+	testConnection(check_url, (status) => {
             if (status) {
               indicator.classList.add(`indicators__indicator--connected`);
               statusElement = `
               <span class="indicators__status indicators__status--connected">Connected</span>`;
+	      const state = myUrl.searchParams.get(`state`);
+	      if (state) {
+		  const continueUrl = new URL(`https://wwpass.auth0.com/continue`);
+		  continueUrl.searchParams.append(`state`, state);
+	          window.location.href = continueUrl.href;
+	      }
             } else {
               indicator.classList.add(`indicators__indicator--disconnected`);
               statusElement = `
@@ -137,8 +107,6 @@
           // indicator.innerHTML = `${name}: ${statusElement}`;
 
           indicators.appendChild(indicator);
-        }
-      }
     });
 
     const setButtonTimer = (seconds) => {
@@ -164,17 +132,12 @@
     buttonConnect.addEventListener(`click`, () => {
       clearInterval(delayUpdate);
       clearTimeout(timeoutConnectUpdate);
-      const profile = profileSelector.value;
-      console.log(`Profile chosen: ${profile}`);
-      if (profile === null || profile === ``) {
-        return false;
+      const otp = myUrl.searchParams.get(`otp`);
+      if (otp) {
+          const vpn_url = `wwpl2tp://connect/?name=SoftEther+VPN&host=a0vpn.wwpass.net&hub=a0vpn&u=a0vpn&psk=12345678&nonce=${otp}`;
+          console.log(`Redirect to: ${vpn_url}`);
+          window.open(vpn_url, `_blank`);
       }
-      localStorage.setItem(`last_profile`, profile);
-      var vpn_url = profiles[profile].url;
-      console.log(`Redirect to: ${vpn_url}`);
-      window.open(vpn_url, `_blank`);
-      beforeConnect.style.display = `none`;
-      afterConnect.style.display = `block`;
       return false;
     });
 
