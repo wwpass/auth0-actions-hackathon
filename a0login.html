@@ -1,0 +1,172 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="css/style.min.css" />
+  <title>WWPass - Auth0 Auto VPN</title>
+</head>
+
+<body class="pageBody">
+  <main class="pageMain">
+    <div class="content">
+      <div class="content__element content__element--first content--center  content--narrow">
+        <div class="logo">
+
+        </div>
+        <div class="hr"></div>
+        <div class="before_connect">
+          <ul class="indicators">
+            <!-- <li id="indicator_WWPassVPN" class="indicators__indicator indicators__indicator--connected">WWPassVPN: <span class="indicators__status indicators__status--connected">Connected</span></li>
+            <li id="indicator_WWPassVPN" class="indicators__indicator indicators__indicator--disconnected">WWPassVPN: <span class="indicators__status indicators__status--disconnected">Disconnected</span></li> -->
+          </ul>
+
+            <p class="text">
+              <b>Authentication successful</b>
+            </p>
+            
+            <div class="form">
+              <p class="text">
+                Now your VPN will be connected.
+                <button class="button button--action" id="retry" disabled>
+                  Try again
+                </button>
+              </p>
+            </div>
+
+            <!-- <p class="text">
+              You are not allowed to access VPN
+            </p> -->
+
+          <!-- <button class="button button--action" id="connect">
+            Connect VPN
+          </button>
+          <p class="text text--marginTop-0">
+            Authorization is valid for:<br>
+            <span class="button__timer">
+              
+            </span>
+          </p> -->
+        </div>
+        <div class="after_connect" style="display: none;">
+          <h2 class="heading heading--h2 heading--light heading--marginBottom-0">Connecting VPN</h2>
+          <p class="text" id="connect_text">
+            Your VPN will start automatically.
+          </p>
+          <button class="button button--action">Reconnect VPN</button>
+        </div>
+        <div class="timeout_connect" style="display: none;">
+          <p class="text">
+            Your current connection timed out.
+            <button class="button button--action" id="reload">
+              Reload page
+            </button>
+          </p>
+        </div>
+        <div class="hr"></div>
+        <div class="text text--sm">
+          <p class="text text--sm">
+            If VPN Application does not start, make sure WWPass Connector app is installed.
+          </p>
+          <p class="text text--sm">
+            <a class="text text--sm text--link" href="#TODO">WWPass connector application for&nbsp;Windows</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+  <footer class="pageFooter">
+    <ul class="pageFooter__nav">
+      <li class="pageFooter__item"><span class="text text--sm">© WWPASS</span></li>
+    </ul>
+  </footer>
+
+  <script>
+    window.history.replaceState({}, document.title, document.location.pathname);
+  </script>
+
+  <script>
+    const beforeConnect = document.querySelector(`.before_connect`);
+    const afterConnect = document.querySelector(`.after_connect`);
+    const timeoutConnect = document.querySelector(`.timeout_connect`);
+    const profileSelector = document.querySelector(`#profile_selector`);
+    const buttonConnect = document.querySelector(`#connect`);
+    const buttonTimer = document.querySelector(`.button__timer`);
+
+    let delay = 30;
+    
+    const timeoutConnectUpdate = setTimeout(() => {
+      beforeConnect.style.display = `none`;
+      timeoutConnect.style.display = `block`;
+    }, delay * 1000);
+
+    buttonConnect.addEventListener(`click`, () => {
+      clearInterval(delayUpdate);
+      clearTimeout(timeoutConnectUpdate);
+      const profile = profileSelector.value;
+      console.log(`Profile chosen: ${profile}`);
+      if (profile === null || profile === ``) {
+        return false;
+      }
+      localStorage.setItem(`last_profile`, profile);
+      const anyconnect_url = `#TODO-URL`
+      console.log(`Redirect to: ${anyconnect_url}`);
+      window.open(anyconnect_url, `_blank`);
+      beforeConnect.style.display = `none`;
+      afterConnect.style.display = `block`;
+      return false;
+    });
+
+    const setButtonTimer = (seconds) => {
+      buttonTimer.innerHTML = `
+        ${seconds}
+        <span class="button__timerAnimation"></span>`;
+    };
+    setButtonTimer(delay);
+
+    const delayUpdate = setInterval(() => {
+      delay -= 1;
+      setButtonTimer(delay);
+    }, 1000);
+    window.setTimeout(() => { clearInterval(delayUpdate) }, delay * 1000);
+  </script>
+
+  <script>
+    const buttonReload = document.querySelector(`#reload`);
+
+    buttonReload.addEventListener(`click`, () => {
+      location.reload();
+    });
+
+  </script>
+
+  <script>
+    const indicators = document.querySelector(`.indicators`);
+    const indicator = document.createElement(`li`);
+    const name = `Some_Name`;
+    indicator.id = `indicator_${name}`;
+    indicator.classList.add(`indicators__indicator`);
+
+    let statusElement = ``;
+
+    const status = `ok`;
+    
+      if (status) {
+        indicator.classList.add(`indicators__indicator--connected`);
+        statusElement = `
+        <span class="indicators__status indicators__status--connected">Connected</span>`;
+      } else {
+        indicator.classList.add(`indicators__indicator--disconnected`);
+        statusElement = `
+        <span class="indicators__status indicators__status--disconnected">Disconnected</span>`;
+      }
+
+    indicator.innerHTML = `${name}: ${statusElement}`;
+
+    indicators.appendChild(indicator);
+  </script>
+</body>
+
+</html>
