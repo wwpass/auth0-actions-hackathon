@@ -19,22 +19,9 @@
         <div class="before_connect">
           <ul class="indicators"></ul>
 
-            <p class="text">
-              <b>Authentication successful</b>
-            </p>
-            
-            <div class="form">
-              <p class="text">
-                Now your VPN will be connected.
-                <button class="button button--action" id="retry" disabled>
-                  Try again
-                </button>
-              </p>
-            </div>
-
-            <!-- <p class="text">
-              You are not allowed to access VPN
-            </p> -->
+          <p class="text">
+            <b>Authentication successful</b>
+          </p>
 
           <button class="button button--action" id="connect">
             Connect VPN
@@ -46,18 +33,11 @@
             </span>
           </p>
         </div>
-        <div class="after_connect">
-          <h2 class="heading heading--h2 heading--light heading--marginBottom-0">Connecting VPN</h2>
-          <p class="text" id="connect_text">
-            Your VPN will start automatically.
-          </p>
-          <button class="button button--action">Reconnect VPN</button>
-        </div>
         <div class="timeout_connect" style="display: none;">
           <p class="text">
-            Your current connection timed out.
+            Your current authorization timed out.
             <button class="button button--action" id="reload">
-              Reload page
+              Try again
             </button>
           </p>
         </div>
