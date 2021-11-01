@@ -47,7 +47,7 @@
             If VPN Application does not start, make sure WWPass Connector app is installed.
           </p>
           <p class="text text--sm">
-            <a class="text text--sm text--link" href="#TODO">WWPass connector application for&nbsp;Windows</a>
+            <a class="text text--sm text--link" href="/getapp">WWPass connector application for&nbsp;Windows</a>
           </p>
         </div>
       </div>
@@ -86,25 +86,25 @@
       let statusElement = ``;
 
       testConnection(check_url, (status) => {
-                if (status) {
-                  indicator.classList.add(`indicators__indicator--connected`);
-                  statusElement = `<span class="indicators__status indicators__status--connected">Connected</span>`;
-                  const state = myUrl.searchParams.get(`state`);
-                  if (state) {
-		                const continueUrl = new URL(`{{ return_url }}`);
-  		              continueUrl.searchParams.append(`state`, state);
-	                  window.location.href = continueUrl.href;
-                  } else {
-                      indicator.classList.add(`indicators__indicator--disconnected`);
-                      statusElement = `
-                      <span class="indicators__status indicators__status--disconnected">Disconnected</span>`;
-                  }
-                  indicator.innerHTML = `${name}: ${statusElement}`;
-                }
+        if (status) {
+          indicator.classList.add(`indicators__indicator--connected`);
+          statusElement = `<span class="indicators__status indicators__status--connected">Connected</span>`;
+          const state = myUrl.searchParams.get(`state`);
+          if (state) {
+            const continueUrl = new URL(`{{ return_url }}`);
+            continueUrl.searchParams.append(`state`, state);
+            window.location.href = continueUrl.href;
+          }
+          indicator.innerHTML = `${name}: ${statusElement}`;
+        }  else {
+          indicator.classList.add(`indicators__indicator--disconnected`);
+          statusElement = `
+          <span class="indicators__status indicators__status--disconnected">Disconnected</span>`;
+        }
       })
           // indicator.innerHTML = `${name}: ${statusElement}`;
 
-          indicators.appendChild(indicator);
+      indicators.appendChild(indicator);
     });
 
     const setButtonTimer = (seconds) => {
@@ -135,7 +135,7 @@
     });
 
     buttonReload.addEventListener(`click`, () => {
-      location.reload();
+      window.location.href = "/";
     });
 
     const testConnection = (resource, callback) => {
